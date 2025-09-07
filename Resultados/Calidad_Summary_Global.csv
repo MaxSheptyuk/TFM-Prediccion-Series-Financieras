@@ -1,0 +1,10 @@
+metric;mean
+n_trades;656.68
+mean_final_ret;0.003634269397815145
+median_final_ret;0.004222453015249217
+mean_avg_pos_path_ret;0.017660436031170818
+total_sum_pos_path_ret;46.87309510909788
+total_pos_days;1754.32
+hit_ratio;0.7824718393708388
+IC_final;-0.016478902342063423
+Rank_IC_final;-0.008239386593422368
