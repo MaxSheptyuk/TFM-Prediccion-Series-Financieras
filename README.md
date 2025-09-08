@@ -59,7 +59,7 @@ Construir y validar un pipeline completo: **descarga y ETL de datos → feature 
 
 ---
 
-## 🧩 Ficheros clave (rápido)
+## 🧩 Ficheros clave (descripción breve)
 
 **BuildDataSet/**
 - `Download_Historical_Data.py` – Descarga OHLCV (yfinance) + ETL (imputación, redondeos, control de % nulos). **Salida:** `Data/AllStocksHistoricalData.csv` *(ojo a la carpeta: `Data/` con mayúscula/minúscula)*.
