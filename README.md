@@ -55,46 +55,41 @@ Construir y validar un pipeline completo: **descarga y ETL de datos → feature 
 ├─ Resultados/        # tablas, figuras, logs
 └─ Tests_Prediccion/  # predicciones por fecha/activo (si aplica)
 ```
-
-> *Nota:* Por elección del autor, el pipeline LSTM no se incluye en este README.
+> *Nota:* El pipeline LSTM no se incluye en este README por decisión del autor.
 
 ---
 
 ## 🧩 Ficheros clave (rápido)
 
 **BuildDataSet/**
-- `Download_Historical_Data.py` – Descarga OHLCV (yfinance) + ETL (imputación, redondeos, control de % nulos).
-- `Build_Dataset_All_Features.py` – Construye el **dataset final** por símbolo con indicadores.
+- `Download_Historical_Data.py` – Descarga OHLCV (yfinance) + ETL (imputación, redondeos, control de % nulos). **Salida:** `Data/AllStocksHistoricalData.csv` *(ojo a la carpeta: `Data/` con mayúscula/minúscula)*.
+- `Build_Dataset_All_Features.py` – Construye el **dataset final** por símbolo con indicadores. **Salida:** `DATA/Dataset_All_Features.csv`.
+- `Adaptive_Feature_Normalizer.py` – **Normalización adaptativa** según *skewness* (evita *leakage*). **Salida:** `DATA/Dataset_All_Features_Transformado.csv`.
+- `Build_Dataset_Auxiliar_Backtesting.py` – Auxiliares para backtesting (ATR simple). **Salida:** `DATA/AllStocksHistoricalData_Auxiliar_Backtesting.csv`.
 - `Comprobar_Coherencia_Dataset.py` – Chequeos de calidad (nulos, duplicados, rangos).
-- `Build_Dataset_Auxiliar_Backtesting.py` – Utilidades para backtesting (p. ej., ATR simple).
 
 **BackTesting/**
-- `Backtester.py` – **Motor base** de backtesting (señales, posiciones, métricas, logs).
-- `BacktesterSignalExit.py` – Backtesting con **salida gobernada por señal**.
+- `Backtester.py` – **Motor base** de backtesting (señales, posiciones, métricas, logs). **Salida:** `Resultados/Backtesting_TradeLog_{symbol}.csv`.
+- `BacktesterSignalExit.py` – Backtesting con **salida por señal**. **Salida:** `Resultados/Backtesting_TradeLog_{symbol}_SignalExit.csv`.
 - `BacktesterCalidadML.py` – Backtesting de **calidad de señal** (umbrales, Spearman robusto).
 
-**GA**
+**GA/**
 - `GA_Feature_Selection.py` – **Algoritmo Genético** para seleccionar subconjuntos de *features* (torneo, crossover, mutación), compatible con ElasticNet/SVM/MLP/XGBoost.
 
 **Tests_Prediccion/**
-- `Test_Prediccion_Metricas_KFoldCV.py` – **K-Fold por años** para evaluar modelos.
-- `Test_Prediccion_Target_Vs_Predicted.py` – Comparación **target vs. predicho** (sesgos/lag).
+- `Test_Prediccion_Metricas_KFoldCV.py` – **K-Fold por años** para evaluar modelos. **Salida:** `Resultados/Predicciones_KFoldsCV_{model_name}.csv`.
+- `Test_Prediccion_Target_Vs_Predicted.py` – Comparación **target vs. predicho** (sesgos/lag). **Salida:** `Resultados/Predicciones_Test_{model_name}_{symbol}.csv`.
 
 **Analisis/**
-- `Analisis_Metricas_Trading_Target.py` – Métricas por (W, H): ROI, CAGR, MaxDD, payoff, expectancy, % ganadoras.
-- `Analisis_Impacto_Tuning.py` – Impacto del *tuning* por stock vs baseline.
-- (Resto `Analisis_*` aportan comparativas adicionales: MLP, GA vs aleatorias, frecuencia de features, DA, volatilidad, etc.)
-
-**Raíz (utilidades y pipelines)**
-- `Feature_Generator.py` – Indicadores técnicos masivos (EMA, RSI, **MACD con naming por salida**, Stochastic, Williams %R, CCI, ADX/DI±, ATR, Bollinger, OBV, …).
-- `Adaptive_Feature_Normalizer.py` – **Normalización adaptativa** según *skewness* (evita *leakage*).
-- `Pipeline_GA_Seleccion_Features_AllStocks.py` – Selección **GA** de features por símbolo/cartera.
-- `Pipeline_Ajuste_Hiperparametros.py` – *Tuning* con validación temporal.
-- `Pipeline_BackTesting_GAXGBoost.py` – **Principal**: XGBoost + GA (entrenamiento + backtesting).
-- `Pipeline_BackTesting_GAXGBoost_Calidad.py` – Variante centrada en **calidad de señal**.
-- `Pipeline_BackTesting_XGB_AllFeatures.py` – **Baseline** XGBoost con todas las *features* (sin GA).
-- `Pipeline_BackTesting_MLP_OHLC.py` / `…_Original.py` – Pipelines **MLP** (scikit-learn).
-- `Pipeline_BackTesting_ARIMA.py` – **Benchmark ARIMA**.
+- `Analisis_Metricas_Trading_Target.py` – Calcula métricas agregadas por *target* y cartera. **Salida:** `Resultados/Resumen_Metricas_Trading.csv`.
+- `Analisis_Metricas_Trading_Arquitecturas_MLP.py` – Resumen por arquitecturas MLP. **Salida:** `Resultados/Resumen_Metricas_Trading_Arquitecturas.csv`.
+- `Analisis_Impacto_Tuning.py` – Impacto del *tuning*. **Salidas:** `Resultados/Comparativa_Tuning_2020_2024.csv`, `Resultados/Grafico_Mejora_Tuning.png`.
+- `Analisis_GA_Features_MasSeleccionas.py` – Frecuencia de *features* seleccionadas por GA. **Salida:** `Resultados/GA_Frecuencia_Features.csv`.
+- `Analisis_Features_GA_vs_Aleatorias.py` – GA vs selección aleatoria. **Salida:** `Resultados/Comparativa_GA_vs_Aleatorias.csv`.
+- `Analisis_GA_Seleccion_Modelo.py` – Selección GA y evaluación multi–modelo (K-Fold temporal). **Salida:** `Resultados/Comparativa_GA_Multimodelo_KFold.csv`.
+- `Analisis_Directional_Acccuracy_AllStocks.py` – Accuracy direccional diario (close-only, umbral u). **Salida:** `Resultados/DA_Binary_Daily_AllStocks_SIMPLE.csv`.
+- `Analisis_Feature_Engineering_GA.py` – Estudia el impacto del GA (exploratorio, sin guardados por defecto).
+- `Analisis_Variacion_Precios.py` – Variaciones y resumen estadístico (exploratorio, sin guardados por defecto).
 
 ---
 
@@ -102,78 +97,28 @@ Construir y validar un pipeline completo: **descarga y ETL de datos → feature 
 1) **Datos y dataset**  
    `BuildDataSet/Download_Historical_Data.py` → `BuildDataSet/Build_Dataset_All_Features.py` →  
    `Adaptive_Feature_Normalizer.py` → `BuildDataSet/Build_Dataset_Auxiliar_Backtesting.py` → `BuildDataSet/Comprobar_Coherencia_Dataset.py`  
-   **Salidas esperadas:** `DATA/` (históricos, dataset con features y versión normalizada), `Resultados/Checks/` (informes de coherencia).
+   **Salidas esperadas:** `Data/AllStocksHistoricalData.csv`, `DATA/Dataset_All_Features.csv`, `DATA/Dataset_All_Features_Transformado.csv`, `DATA/AllStocksHistoricalData_Auxiliar_Backtesting.csv`.
 
 2) **Selección de features (GA)**  
    `Pipeline_GA_Seleccion_Features_AllStocks.py`  
-   **Salidas esperadas:** `Resultados/GA/` (p. ej., `selected_features_*.csv|json` + logs).
+   **Salidas esperadas:** `Resultados/GA/…` *(según configuración; features seleccionadas y logs).*
 
 3) **Ajuste de hiperparámetros**  
    `Pipeline_Ajuste_Hiperparametros.py`  
-   **Salidas esperadas:** `Resultados/Tuning/` (p. ej., `best_params_*.csv|json` + métricas CV).
+   **Salidas esperadas:** `Resultados/Hiperparametros_{TARGET}.csv`.
 
 4) **Backtesting (principal: GA + XGBoost)**  
    `Pipeline_BackTesting_GAXGBoost.py`  
-   **Salidas esperadas:** `Resultados/Backtesting/` (curvas de equity `*.png`, `trades_log_*.csv`, `Resumen_Metricas_Trading.csv`).
+   **Salidas esperadas:** `Resultados/Backtesting_TradeLog_{symbol}.csv` *(y métricas que consolida la fase de análisis).*
 
 5) **Análisis y tablas finales**  
-   `Analisis/Analisis_Metricas_Trading_Target.py` (y otros `Analisis_*`)  
-   **Salidas esperadas:** `Resultados/Analisis/` (tablas comparativas y figuras).
+   Ejecutar `Analisis/Analisis_Metricas_Trading_Target.py` y otros `Analisis_*` según necesidad (ver tabla anterior).
 
 > Si cambias **W/H** o la cartera de símbolos, repite (2) y (3) antes del (4).
 
 ---
 
-## 🖼️ Figuras y tablas: **qué genera cada script**
-> Dónde mirar para **gráficos (figuras)** y **tablas (CSV)** de tu memoria.
-
-- **Curvas de equity por target y comparativas de ROI/DD**  
-  **Script:** `Analisis/Analisis_Metricas_Trading_Target.py`  
-  **Figuras:** `Resultados/Analisis/Equity_*.png`, `Resultados/Analisis/ROI_*.png` *(nombres orientativos)*  
-  **Tablas:** `Resultados/Analisis/Resumen_Metricas_Trading.csv` y, si está habilitado, `Resumen_Cartera_Anual.csv` (ROI anual, DD, payoff, expectancy, % ganadoras).
-
-- **Barras/tabla de rendimiento de cartera anual**  
-  **Script:** `Analisis/Analisis_Metricas_Trading_Target.py`  
-  **Tablas:** `Resultados/Analisis/Resumen_Cartera_Anual.csv` *(siempre que el bloque anual esté activo en el script)*  
-  **Figuras:** `Resultados/Analisis/ROI_Anual_Barras_*.png` *(si la sección de plotting está activa)*
-
-- **Comparativa de arquitecturas MLP**  
-  **Script:** `Analisis/Analisis_Metricas_Trading_Arquitecturas_MLP.py`  
-  **Figuras:** `Resultados/Analisis/MLP_*.png`  
-  **Tablas:** `Resultados/Analisis/Resumen_Metricas_Trading_Arquitecturas.csv`
-
-- **Impacto del tuning**  
-  **Script:** `Analisis/Analisis_Impacto_Tuning.py`  
-  **Figuras:** `Resultados/Analisis/Grafico_Mejora_Tuning.png`  
-  **Tablas:** `Resultados/Analisis/Comparativa_Tuning_*.csv`
-
-- **Frecuencia de features seleccionadas por GA**  
-  **Script:** `Analisis/Analisis_GA_Features_MasSeleccionas.py`  
-  **Figuras:** `Resultados/Analisis/GA_Frecuencia_Features.png`  
-  **Tablas:** `Resultados/Analisis/GA_Frecuencia_Features.csv`
-
-- **GA vs selección aleatoria**  
-  **Script:** `Analisis/Analisis_Features_GA_vs_Aleatorias.py`  
-  **Figuras:** `Resultados/Analisis/GA_vs_Aleatorias_*.png`  
-  **Tablas:** `Resultados/Analisis/Comparativa_GA_vs_Aleatorias.csv`
-
-- **Accuracy direccional (DA) por símbolo**  
-  **Script:** `Analisis/Analisis_Directional_Acccuracy_AllStocks.py`  
-  **Figuras:** `Resultados/Analisis/DA_*.png`  
-  **Tablas:** `Resultados/Analisis/DA_Binary_Daily_AllStocks_*.csv`
-
-- **Variación de precios / volatilidad**  
-  **Script:** `Analisis/Analisis_Variacion_Precios.py`  
-  **Figuras:** `Resultados/Analisis/Variacion_*.png`  
-  **Tablas:** `Resultados/Analisis/Variacion_*.csv`
-
-> **Assets/**: si tu memoria usa una carpeta `Assets/`, basta con **copiar** desde `Resultados/Analisis/*.png` a `Assets/` (sólo las figuras definitivas).
-
----
-
 ## ▶️ Ejecución rápida (solo `.py`)
-
-> Edita parámetros en la cabecera de cada script (símbolos, fechas, W/H, costes, seeds).
 
 ```bash
 # 1) Datos + dataset + normalización + auxiliares + control de calidad
@@ -202,4 +147,4 @@ python Analisis/Analisis_Metricas_Trading_Target.py
 `pandas`, `numpy`, `scikit-learn`, `scipy`, `xgboost`, `deap`, `matplotlib`, `tqdm`, `yfinance`, `pandas-ta` *(o `ta`)*, `statsmodels`, `python-dateutil`.  
 *(Si usas deep learning: `torch`/`torchvision`/`torchaudio` o `tensorflow`/`keras`.)*
 
-**Python:** 3.12.x (CPython). Para auditar versiones reales del entorno, ver `audit_versions_strict.py` o `versions_auditoria.py` (opcional).
+**Python:** 3.12.x (CPython). Para auditar versiones reales del entorno, ver `audit_versions_strict.py` o `check_env_strict.py` (opcional).
